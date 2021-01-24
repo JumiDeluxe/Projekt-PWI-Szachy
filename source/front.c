@@ -158,8 +158,21 @@ void main_loop()
             wclear(From);
             wclear(To);
             draw_board();
+		if(tolower(from[0]) == 'e' && tolower(from[1]) == 'x' &&
+		tolower(to[0]) == 'i' && tolower(to[1]) == 't') return;
         } while (!convert_coordinates(i, from, to));
 		 draw_board();
+		 
+		 int status =  checkWinCondition();
+		 if(status == 1) {
+			//Wygrywa gracz 2
+			game_over = true;
+		 } 
+		 if(status == 2) {
+			//Wygrywa gracz 1
+			game_over = true;
+		 } 
+    
         i++;
     }
 }
@@ -287,7 +300,7 @@ void draw_pieces(WINDOW *board)
         {//kon
          {' ', ' ', ' ', '\\', '`', '~', '\'', '/', ' ', ' ', ' '},
          {' ', ' ', ' ', '(', 'o', ' ', 'o', ')', ' ', ' ', ' '},
-         {' ', ' ', ' ', ' ', '\\', ' ', '/', '\\', ' ', ' ', ' '},
+         {' ', ' ', ' ', '/', '\\', ' ', '/', '\\', ' ', ' ', ' '},
          {' ', ' ', ' ', ' ', ' ', '"', ' ', ' ', ' ', ' ', ' '}},
         {//goniec
          {' ', ' ', ' ', '/', ' ', '+', ' ', '\\', ' ', ' ', ' '},
@@ -401,9 +414,9 @@ void main_menu()
     // OPCJE MENU
     keypad(MenuPanel,true);
     char choices[4][12] = {
-        "Nowa gra",
-        "Jakas opcja",
-        "Jakas opcja",
+        "Zwykla gra",
+        "Horda",
+        "Rewolucja",
         "Wyjdz z gry"
     };
     bool isPicked = false;
@@ -446,19 +459,30 @@ void main_menu()
         if(highlight > 3) highlight--;
         if(highlight < 0) highlight++;
     }
+    
+	wclear(MenuContainer);
+	bkgd(COLOR_PAIR(25));
+	delwin(MenuContainer);
+	clear();
+    
     switch (highlight)
     {
         case 0:
-            wclear(MenuContainer);
-            bkgd(COLOR_PAIR(25));
-            delwin(MenuContainer);
+            gameInit();
             main_loop();
             break;
         case 1:
+			gameInit();
+			gameHoardInit();
+            main_loop();
+            break;
         case 2:
+			gameInit();
+			gameRevoltInit();
+            main_loop();
             break;
         case 3:
-            return;
+            exit(0);
             break;
         default:
             break;

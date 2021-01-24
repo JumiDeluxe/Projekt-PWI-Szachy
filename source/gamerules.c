@@ -81,6 +81,37 @@ void gameInit() {
 
 	return;
 }
+void gameHoardInit() {
+	ChessPiece whitePawn = getChessPiece(0, 6);
+	for(int i = 0; i <= 7; i++)
+		if(i != 4)
+			setChessPiece(whitePawn, i, 7);
+			
+	for(int i = 0; i <= 7; i++) {
+		setChessPiece(whitePawn, i, 5);
+		setChessPiece(whitePawn, i, 4);
+	}
+	setChessPiece(whitePawn, 1, 3);
+	setChessPiece(whitePawn, 2, 3);
+	setChessPiece(whitePawn, 5, 3);
+	setChessPiece(whitePawn, 6, 3);
+}
+void gameRevoltInit() {
+	for(int i = 0; i <= 7; i++) {
+		if(i != 4) {
+			removeChessPiece(i, 7);
+			removeChessPiece(i, 1);
+		}
+	}
+	ChessPiece blackKnight = getChessPiece(1, 0);
+	setChessPiece(blackKnight, 0, 0);
+	removeChessPiece(1, 0);
+	setChessPiece(blackKnight, 2, 0);
+	removeChessPiece(3, 0);
+	removeChessPiece(5, 0);
+	setChessPiece(blackKnight, 6, 0);
+	removeChessPiece(7, 0);
+}
 
 bool performMove(int xA, int yA, int xB, int yB) {
 	//nie można wykonać ruchu w miejscu
@@ -192,32 +223,30 @@ bool checkPawnsMove(int color, int xA, int yA, int xB, int yB) {
 //TODO sprawdzenie czy pola pomiędzy A i B są puste
 bool checkBishopMove(int color, int xA, int yA, int xB, int yB) {
 	//sprawdzenie czy ruch jest po skosie
-	ChessPiece bishop = getChessPiece(xA, yA);
-	if(xA - yA == xB - yB) {
+	if(xA - yA == xB - yB || xA + yA == xB + yB) {
         if(xB > xA && yB > yA){ //down & right
-            for(int i=1,j=1;i<(xB-xA-1);i++, j++){
-				if(getChessPiece(xA+i,yA+j).type != 0) return false;
+            for(int i=1;i<(xB-xA-1);i++){
+				if(getChessPiece(xA+i,yA+i).type != 0) return false;
 			}
 		}
-        else if(xB > xA && yB < yA){ //up & right
-            for(int i=1,j=-1;i<(xB-xA-1);i++, j--){
-				if(getChessPiece(xA+i,yA+j).type != 0) return false;
+        if(xB > xA && yB < yA){ //up & right
+            for(int i=1;i<(xB-xA-1);i++){
+				if(getChessPiece(xA+i,yA-i).type != 0) return false;
 			}
 		}
-        else if(xB < xA && yB > yA){ //down & left
-            for(int i=-1,j=1;i>(xB-xA-1);i--, j++){
-				if(getChessPiece(xA+i,yA+j).type != 0) return false;
+        if(xB < xA && yB > yA){ //down & left
+            for(int i=1;i<(xA-xB-1);i++){
+				if(getChessPiece(xB+i,yB-i).type != 0) return false;
 			}
 		}
-        else if(xB < xA && yB < yA){ //up & left
-            for(int i=-1,j=-1;i>(xB-xA-1);i--, j--){
-				if(getChessPiece(xA+i,yA+j).type != 0) return false;
+        if(xB < xA && yB < yA){ //up & left
+            for(int i=1;i<(xA-xB-1);i++){
+				if(getChessPiece(xB+i,yB+i).type != 0) return false;
 			}
 		}
-		//if(getChessPiece(xB, yB).color == bishop.color) return false;
-        else return true;
+        return true;
     }
-    else return false;
+    return false;
 }
 
 //koń
@@ -309,27 +338,31 @@ bool checkKingMove(int color, int xA, int yA, int xB, int yB) {
 	return false;
 }
 
-int checkWinCondition(int color) {
+int checkWinCondition() {
+	if(isKingChecked(1) == 0) return 2;
+	if(isKingChecked(2) == 0) return 1;
 	return 0;
 }
 
-bool isKingChecked(int color) {
-	int kingx, kingy;
+int isKingChecked(int color) {
+	int kingx, kingy, status = 0;
 	for(int y = 0; y < 8; y++) {
 		for(int x = 0; x < 8; x++) {
 			if(getChessPiece(x, y).type == 6 && getChessPiece(x, y).color == color) {
-				kingx = x; kingy = y;
+				kingx = x; kingy = y; status = 1;
 			}
 		}
 	}
+	if(status == 0) return 0;
+	
 	ChessPiece cp;
 	for(int y = 0; y < 8; y++) {
 		for(int x = 0; x < 8; x++) {
 			cp = getChessPiece(x, y);
-			if(cp.color + color == 3 && cp.moveFunctionPointer(cp.color, x, y, kingx, kingy)) return true;
+			if(cp.color + color == 3 && cp.moveFunctionPointer(cp.color, x, y, kingx, kingy)) return 1;
 		}
 	}
-	return false;
+	return 2;
 }
 
 void DisplayArrayContent() {
